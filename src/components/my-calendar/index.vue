@@ -21,7 +21,7 @@
       </div>
       <ul class="date-wrapper">
         <li v-for="(item,index) in newAllDates" :key="index">
-          <span v-for="(innerItem,idx) in item" :key="idx" :class="{'current':innerItem.m==='current'}">
+          <span v-for="(innerItem,idx) in item" :key="idx" :class="{'current':innerItem.m==='current','choose':getCurrentTime(innerItem)===hadChooseTime,'today':getCurrentTime(innerItem)===todayTime}" @click="handleClickDate(innerItem)">
             {{innerItem.date}}
           </span>
         </li>
@@ -39,13 +39,24 @@ export default {
       year: '', // 当前显示的年
       month: '', // 当前显示的月
       week: ['日', '一', '二', '三', '四', '五', '六'],
-      allShowDates: [] // 当前要显示的所有日期，包括上个月和下个月
+      allShowDates: [], // 当前要显示的所有日期，包括上个月和下个月
+      hadChooseTime: 0 // 当前点击的日期时间戳
     }
   },
   computed: {
     // 对所有日期分组，7天一组
     newAllDates () {
       return this.chunk(this.allShowDates, 7)
+    },
+    // 今天的时间戳
+    todayTime () {
+      let today = new Date()
+      let d = {
+        year: today.getFullYear(),
+        month: today.getMonth(),
+        date: today.getDate()
+      }
+      return this.getCurrentTime(d)
     }
   },
   methods: {
@@ -73,6 +84,8 @@ export default {
       // 向数组中添加当前月日期,m是标记，'current'表示当前月，'prev'表示上个月，'next'表示下个月
       for (let i = 0; i < thisMonthInfo.days; i++) {
         allShowDates.push({
+          year: year,
+          month: month,
           date: i + 1,
           m: 'current'
         })
@@ -81,18 +94,42 @@ export default {
       // thisMonthInfo.firstDay-1 本月第一天的星期减1就是上个月的最后一天的星期，最后一天星期n,则在前添加n天
       // 星期的范围是0～6
       for (let i = 0; i < thisMonthInfo.firstDay; i++) {
-        allShowDates.unshift({
-          date: prevMonthInfo.days - i,
-          m: 'prev'
-        })
+        // 如果month为0，即1月，则上月为往年12月，year-1,month为11
+        if (month === 0) {
+          allShowDates.unshift({
+            year: year - 1,
+            month: 11,
+            date: prevMonthInfo.days - i,
+            m: 'prev'
+          })
+        } else {
+          allShowDates.unshift({
+            year: year,
+            month: month - 1,
+            date: prevMonthInfo.days - i,
+            m: 'prev'
+          })
+        }
       }
       // 向数组尾部添加下个月日期
       // 7-thisMonthInfo.lastDay-1 7减去本月最后一个星期再减去周日，就是一周剩余的天数，即是下个月要接的天数
       for (let i = 0; i < 7 - thisMonthInfo.lastDay - 1; i++) {
-        allShowDates.push({
-          date: i + 1,
-          m: 'next'
-        })
+        // 如果month为11，即12月，则下个月是明年1月，year+1,month为0
+        if (month === 11) {
+          allShowDates.push({
+            year: year + 1,
+            month: 0,
+            date: i + 1,
+            m: 'next'
+          })
+        } else {
+          allShowDates.push({
+            year: year,
+            month: month + 1,
+            date: i + 1,
+            m: 'next'
+          })
+        }
       }
       return allShowDates
     },
@@ -125,6 +162,24 @@ export default {
         this.month = 0
       }
       this.allShowDates = this.getAllDates(this.year, this.month)
+    },
+    // 点击日期
+    handleClickDate (d) {
+      // 是否需要切换
+      if (d.m === 'prev') {
+        this.reduceMonth()
+      } else if (d.m === 'next') {
+        this.addMonth()
+      }
+      // 计算当前日期的事件戳
+      this.hadChooseTime = this.getCurrentTime(d)
+      // 派送日期给父元素
+      this.$emit('select', d)
+      console.log(`${d.year}-${d.month + 1}-${d.date}`)
+    },
+    // 获取时间戳
+    getCurrentTime (d) {
+      return new Date(d.year, d.month, d.date).getTime()
     },
     // 数组分块
     chunk (arr, size) {
@@ -170,12 +225,22 @@ export default {
       li {
         display: flex;
         justify-content: space-around;
+        margin-bottom: 5px;
         span {
           width: 24px;
+          height: 24px;
+          border-radius: 50%;
           color: #c0c4cc;
           text-align: center;
           &.current {
             color: #606266;
+            &.today {
+              color: red;
+            }
+            &.choose {
+              background: #409eff;
+              color: #fff;
+            }
           }
         }
       }

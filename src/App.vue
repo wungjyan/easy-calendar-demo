@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <my-calendar></my-calendar>
+    <my-calendar @select="handleSelectDate"></my-calendar>
+    <div style="text-align:center;margin-top:30px;"> 当前日期：{{d.year}}-{{d.month+1}}-{{d.date}}</div>
   </div>
 </template>
 
@@ -8,8 +9,26 @@
 import myCalendar from './components/my-calendar'
 export default {
   name: 'app',
+  data () {
+    return {
+      d: null
+    }
+  },
   components: {
     myCalendar
+  },
+  methods: {
+    handleSelectDate (d) {
+      this.d = d
+    }
+  },
+  mounted () {
+    let today = new Date()
+    this.d = {
+      year: today.getFullYear(),
+      month: today.getMonth(),
+      date: today.getDate()
+    }
   }
 }
 </script>
