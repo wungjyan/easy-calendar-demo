@@ -20,7 +20,7 @@
         <span v-for="item in week" :key="item">{{item}}</span>
       </div>
       <ul class="date-wrapper">
-        <li v-for="(item,index) in newAllDays" :key="index">
+        <li v-for="(item,index) in newAllDates" :key="index">
           <span v-for="(innerItem,idx) in item" :key="idx" :class="{'current':innerItem.m==='current'}">
             {{innerItem.date}}
           </span>
@@ -39,13 +39,13 @@ export default {
       year: '', // 当前显示的年
       month: '', // 当前显示的月
       week: ['日', '一', '二', '三', '四', '五', '六'],
-      currentShowDays: [] // 当前要显示的所有日期，包括上个月和下个月
+      allShowDates: [] // 当前要显示的所有日期，包括上个月和下个月
     }
   },
   computed: {
     // 对所有日期分组，7天一组
-    newAllDays () {
-      return this.chunk(this.currentShowDays, 7)
+    newAllDates () {
+      return this.chunk(this.allShowDates, 7)
     }
   },
   methods: {
@@ -63,16 +63,16 @@ export default {
     },
     // 获取要展示的日期数组
     // 周日放到最前面
-    getAllDays (year, month) {
+    getAllDates (year, month) {
       // 本月信息
       let thisMonthInfo = this.getCurrentMonthInfo(year, month)
       // 上月信息
       let prevMonthInfo = this.getCurrentMonthInfo(year, month - 1)
       // 当前要展示的日期数组
-      let currentShowDays = []
+      let allShowDates = []
       // 向数组中添加当前月日期,m是标记，'current'表示当前月，'prev'表示上个月，'next'表示下个月
       for (let i = 0; i < thisMonthInfo.days; i++) {
-        currentShowDays.push({
+        allShowDates.push({
           date: i + 1,
           m: 'current'
         })
@@ -81,7 +81,7 @@ export default {
       // thisMonthInfo.firstDay-1 本月第一天的星期减1就是上个月的最后一天的星期，最后一天星期n,则在前添加n天
       // 星期的范围是0～6
       for (let i = 0; i < thisMonthInfo.firstDay; i++) {
-        currentShowDays.unshift({
+        allShowDates.unshift({
           date: prevMonthInfo.days - i,
           m: 'prev'
         })
@@ -89,17 +89,17 @@ export default {
       // 向数组尾部添加下个月日期
       // 7-thisMonthInfo.lastDay-1 7减去本月最后一个星期再减去周日，就是一周剩余的天数，即是下个月要接的天数
       for (let i = 0; i < 7 - thisMonthInfo.lastDay - 1; i++) {
-        currentShowDays.push({
+        allShowDates.push({
           date: i + 1,
           m: 'next'
         })
       }
-      return currentShowDays
+      return allShowDates
     },
     // 减年份
     reduceYear () {
       this.year = this.year - 1
-      this.currentShowDays = this.getAllDays(this.year, this.month)
+      this.allShowDates = this.getAllDates(this.year, this.month)
     },
     // 减月份
     reduceMonth () {
@@ -109,12 +109,12 @@ export default {
         this.year = this.year - 1
         this.month = 11
       }
-      this.currentShowDays = this.getAllDays(this.year, this.month)
+      this.allShowDates = this.getAllDates(this.year, this.month)
     },
     // 加年份
     addYear () {
       this.year = this.year + 1
-      this.currentShowDays = this.getAllDays(this.year, this.month)
+      this.allShowDates = this.getAllDates(this.year, this.month)
     },
     // 加月份
     addMonth () {
@@ -124,7 +124,7 @@ export default {
         this.year = this.year + 1
         this.month = 0
       }
-      this.currentShowDays = this.getAllDays(this.year, this.month)
+      this.allShowDates = this.getAllDates(this.year, this.month)
     },
     // 数组分块
     chunk (arr, size) {
@@ -137,10 +137,10 @@ export default {
     // 初始化当前日期
     let year = new Date().getFullYear()
     let month = new Date().getMonth()
-    console.log(this.getAllDays(year, month))
+    console.log(this.getAllDates(year, month))
     this.year = year
     this.month = month
-    this.currentShowDays = this.getAllDays(year, month)
+    this.allShowDates = this.getAllDates(year, month)
   }
 }
 </script>
