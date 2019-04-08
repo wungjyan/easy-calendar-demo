@@ -73,7 +73,6 @@ export default {
       }
     },
     // 获取要展示的日期数组
-    // 周日放到最前面
     getAllDates (year, month) {
       // 本月信息
       let thisMonthInfo = this.getCurrentMonthInfo(year, month)
@@ -192,7 +191,7 @@ export default {
     // 初始化当前日期
     let year = new Date().getFullYear()
     let month = new Date().getMonth()
-    console.log(this.getAllDates(year, month))
+    // console.log(this.getAllDates(year, month))
     this.year = year
     this.month = month
     this.allShowDates = this.getAllDates(year, month)
